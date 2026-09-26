@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rust & Ruin: Wilderness Survival</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0d1117;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #gameCanvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            background: #1e293b;
+        }
+        /* HUD UI */
+        #hud {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .bar-container {
+            width: 180px;
+            height: 18px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-fill {
+            height: 100%;
+            width: 100%;
+            transition: width 0.2s ease-out;
+        }
+        #healthFill { background: linear-gradient(90deg, #ef4444, #dc2626); }
+        #hungerFill { background: linear-gradient(90deg, #f59e0b, #d97706); }
+        #staminaFill { background: linear-gradient(90deg, #10b981, #059669); }
+        
+        .bar-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        #timeDisplay {
+            color: #f8fafc;
+            font-size: 14px;
+            font-weight: bold;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            width: fit-content;
+        }
+
+        #inventoryDisplay {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 12px;
+            min-width: 130px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Touch Controls */
+        #joystickZone {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            touch-action: none;
+            z-index: 20;
+        }
+        #joystickKnob {
+            position: absolute;
+            top: 35px;
+            left: 35px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        #actionBtn {
+            position: absolute;
+            bottom: 40px;
+            right: 35px;
+            width: 75px;
+            height: 75px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none;
+            z-index: 20;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        #actionBtn:active {
+            transform: scale(0.92);
+            background: #1e40af;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- HUD Overlay -->
+    <div id="hud">
+        <div id="timeDisplay">☀️ Day 1</div>
+        <div class="bar-container">
+            <div id="healthFill" class="bar-fill"></div>
+            <span class="bar-label">HEALTH</span>
+        </div>
+        <div class="bar-container">
+            <div id="hungerFill" class="bar-fill"></div>
+            <span class="bar-label">HUNGER</span>
+        </div>
+        <div class="bar-container">
+            <div id="staminaFill" class="bar-fill"></div>
+            <span class="bar-label">STAMINA</span>
+        </div>
+    </div>
+
+    <div id="inventoryDisplay">
+        <strong>🎒 Inventory</strong>
+        <div id="invList" style="margin-top:5px; color:#cbd5e1;">Empty</div>
+    </div>
+
+    <!-- Mobile Touch Controls -->
+    <div id="joystickZone">
+        <div id="joystickKnob"></div>
+    </div>
+    <div id="actionBtn">HIT</div>
+
+<script>
+// --- GAME ENGINE SETUP ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// --- GAME STATE & VARS ---
+const WORLD_SIZE = 2500;
+let timeOfDay = 0; // 0 to 1
+let dayCount = 1;
+let dayLength = 120; // seconds
+
+const player = {
+    x: WORLD_SIZE / 2,
+    y: WORLD_SIZE / 2,
+    radius: 16,
+    speed: 3.5,
+    health: 100,
+    hunger: 100,
+    stamina: 100,
+    vx: 0,
+    vy: 0,
+    angle: 0
+};
+
+const inventory = {
+    wood: 0,
+    stone: 0,
+    berry: 0
+};
+
+const keys = {};
+let joystickVector = { x: 0, y: 0 };
+
+// World Objects
+const resources = [];
+const enemies = [];
+
+// Seed World Resources
+for (let i = 0; i < 120; i++) {
+    const type = Math.random() < 0.5 ? 'tree' : (Math.random() < 0.8 ? 'rock' : 'berry');
+    resources.push({
+        x: Math.random() * (WORLD_SIZE - 200) + 100,
+        y: Math.random() * (WORLD_SIZE - 200) + 100,
+        type: type,
+        hp: type === 'rock' ? 5 : 3,
+        maxHp: type === 'rock' ? 5 : 3,
+        radius: type === 'tree' ? 24 : (type === 'rock' ? 18 : 12)
+    });
+}
+
+// Web Audio Generator (No external files needed!)
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (type === 'hit') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    } else if (type === 'collect') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+    }
+}
+
+// --- CONTROLS ---
+window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+// Touch Joystick Logic
+const joystickZone = document.getElementById('joystickZone');
+const joystickKnob = document.getElementById('joystickKnob');
+let touchId = null;
+
+joystickZone.addEventListener('touchstart', e => {
+    const touch = e.changedTouches[0];
+    touchId = touch.identifier;
+    updateJoystick(touch);
+});
+
+joystickZone.addEventListener('touchmove', e => {
+    for (let touch of e.changedTouches) {
+        if (touch.identifier === touchId) updateJoystick(touch);
+    }
+});
+
+function resetJoystick() {
+    touchId = null;
+    joystickKnob.style.transform = `translate(0px, 0px)`;
+    joystickVector = { x: 0, y: 0 };
+}
+
+joystickZone.addEventListener('touchend', resetJoystick);
+joystickZone.addEventListener('touchcancel', resetJoystick);
+
+function updateJoystick(touch) {
+    const rect = joystickZone.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    let dx = touch.clientX - centerX;
+    let dy = touch.clientY - centerY;
+    const dist = Math.hypot(dx, dy);
+    const maxDist = 40;
+
+    if (dist > maxDist) {
+        dx = (dx / dist) * maxDist;
+        dy = (dy / dist) * maxDist;
+    }
+
+    joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+    joystickVector = { x: dx / maxDist, y: dy / maxDist };
+}
+
+// Action / Hit Button
+const actionBtn = document.getElementById('actionBtn');
+actionBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    performAction();
+});
+window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') performAction();
+});
+
+function performAction() {
+    playSound('hit');
+    // Check hit resources
+    resources.forEach((res, index) => {
+        const dist = Math.hypot(player.x - res.x, player.y - res.y);
+        if (dist < res.radius + player.radius + 25) {
+            res.hp--;
+            if (res.type === 'tree') inventory.wood++;
+            if (res.type === 'rock') inventory.stone++;
+            if (res.type === 'berry') {
+                inventory.berry++;
+                player.hunger = Math.min(100, player.hunger + 15);
+            }
+            playSound('collect');
+
+            if (res.hp <= 0) {
+                resources.splice(index, 1);
+            }
+            updateHUD();
+        }
+    });
+
+    // Check hit enemies
+    enemies.forEach((en, index) => {
+        const dist = Math.hypot(player.x - en.x, player.y - en.y);
+        if (dist < en.radius + player.radius + 30) {
+            en.hp -= 25;
+            if (en.hp <= 0) enemies.splice(index, 1);
+        }
+    });
+}
+
+// --- GAME LOOP ---
+let lastTime = performance.now();
+
+function update(dt) {
+    // 1. Time / Day-Night
+    timeOfDay += dt / dayLength;
+    if (timeOfDay >= 1) {
+        timeOfDay = 0;
+        dayCount++;
+    }
+
+    // Spawn Night Monsters
+    const isNight = timeOfDay > 0.5;
+    if (isNight && enemies.length < 5 && Math.random() < 0.01) {
+        enemies.push({
+            x: player.x + (Math.random() - 0.5) * 800,
+            y: player.y + (Math.random() - 0.5) * 800,
+            radius: 14,
+            speed: 2.2,
+            hp: 40,
+            damage: 10
+        });
+    }
+
+    // 2. Player Movement
+    let dx = joystickVector.x;
+    let dy = joystickVector.y;
+
+    if (keys['a'] || keys['arrowleft']) dx = -1;
+    if (keys['d'] || keys['arrowright']) dx = 1;
+    if (keys['w'] || keys['arrowup']) dy = -1;
+    if (keys['s'] || keys['arrowdown']) dy = 1;
+
+    if (dx !== 0 || dy !== 0) {
+        const len = Math.hypot(dx, dy);
+        player.vx = (dx / len) * player.speed;
+        player.vy = (dy / len) * player.speed;
+        player.angle = Math.atan2(dy, dx);
+    } else {
+        player.vx = 0;
+        player.vy = 0;
+    }
+
+    player.x = Math.max(30, Math.min(WORLD_SIZE - 30, player.x + player.vx));
+    player.y = Math.max(30, Math.min(WORLD_SIZE - 30, player.y + player.vy));
+
+    // 3. Survival Drain
+    player.hunger = Math.max(0, player.hunger - 0.1 * dt);
+    if (player.hunger <= 0) {
+        player.health = Math.max(0, player.health - 1.5 * dt);
+    }
+
+    // 4. Enemy AI
+    enemies.forEach(en => {
+        const angle = Math.atan2(player.y - en.y, player.x - en.x);
+        en.x += Math.cos(angle) * en.speed;
+        en.y += Math.sin(angle) * en.speed;
+
+        // Attack Player
+        const dist = Math.hypot(player.x - en.x, player.y - en.y);
+        if (dist < player.radius + en.radius) {
+            player.health = Math.max(0, player.health - en.damage * dt);
+        }
+    });
+
+    updateHUD();
+}
+
+function updateHUD() {
+    document.getElementById('healthFill').style.width = player.health + '%';
+    document.getElementById('hungerFill').style.width = player.hunger + '%';
+    document.getElementById('staminaFill').style.width = player.stamina + '%';
+
+    const isNight = timeOfDay > 0.5;
+    document.getElementById('timeDisplay').innerText = `${isNight ? '🌙 Night' : '☀️ Day'} ${dayCount}`;
+
+    document.getElementById('invList').innerHTML = `
+        🪵 Wood: ${inventory.wood}<br>
+        🪨 Stone: ${inventory.stone}<br>
+        🫐 Berries: ${inventory.berry}
+    `;
+}
+
+function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Camera offset
+    const camX = canvas.width / 2 - player.x;
+    const camY = canvas.height / 2 - player.y;
+
+    ctx.save();
+    ctx.translate(camX, camY);
+
+    // Grid Floor
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 1;
+    const gridSize = 100;
+    for (let x = 0; x < WORLD_SIZE; x += gridSize) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD_SIZE); ctx.stroke();
+    }
+    for (let y = 0; y < WORLD_SIZE; y += gridSize) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD_SIZE, y); ctx.stroke();
+    }
+
+    // World Border
+    ctx.strokeStyle = '#ef4444';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+
+    // Render Resources
+    resources.forEach(res => {
+        ctx.beginPath();
+        if (res.type === 'tree') {
+            ctx.fillStyle = '#15803d';
+            ctx.arc(res.x, res.y, res.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#166534';
+            ctx.arc(res.x - 4, res.y - 4, res.radius * 0.6, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (res.type === 'rock') {
+            ctx.fillStyle = '#64748b';
+            ctx.arc(res.x, res.y, res.radius, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (res.type === 'berry') {
+            ctx.fillStyle = '#a855f7';
+            ctx.arc(res.x, res.y, res.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    });
+
+    // Render Enemies
+    enemies.forEach(en => {
+        ctx.fillStyle = '#dc2626';
+        ctx.beginPath();
+        ctx.arc(en.x, en.y, en.radius, 0, Math.PI * 2);
+        ctx.fill();
+        // Glowing eyes
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(en.x - 4, en.y - 4, 3, 3);
+        ctx.fillRect(en.x + 2, en.y - 4, 3, 3);
+    });
+
+    // Render Player
+    ctx.save();
+    ctx.translate(player.x, player.y);
+    ctx.rotate(player.angle);
+
+    // Body
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath();
+    ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Hands / Weapon direction
+    ctx.fillStyle = '#0284c7';
+    ctx.fillRect(10, -4, 12, 8);
+
+    ctx.restore();
+
+    ctx.restore();
+
+    // Day / Night Overlay
+    let nightAlpha = 0;
+    if (timeOfDay > 0.4 && timeOfDay < 0.6) {
+        nightAlpha = (timeOfDay - 0.4) * 3.5; // dusk
+    } else if (timeOfDay >= 0.6 && timeOfDay < 0.9) {
+        nightAlpha = 0.7; // full night
+    } else if (timeOfDay >= 0.9) {
+        nightAlpha = (1 - timeOfDay) * 7; // dawn
+    }
+
+    if (nightAlpha > 0) {
+        ctx.fillStyle = `rgba(15, 23, 42, ${nightAlpha})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+}
+
+function gameLoop(now) {
+    const dt = (now - lastTime) / 1000;
+    lastTime = now;
+
+    update(dt);
+    render();
+
+    requestAnimationFrame(gameLoop);
+}
+
+requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
