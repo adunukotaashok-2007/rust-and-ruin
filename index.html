@@ -16,31 +16,30 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #0d1117;
+            background-color: #020617;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         #gameCanvas {
             display: block;
             width: 100vw;
             height: 100vh;
-            background: #1e293b;
         }
         /* HUD UI */
         #hud {
             position: absolute;
-            top: 15px;
-            left: 15px;
+            top: 12px;
+            left: 12px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             pointer-events: none;
             z-index: 10;
         }
         .bar-container {
-            width: 180px;
-            height: 18px;
-            background: rgba(15, 23, 42, 0.8);
-            border-radius: 10px;
+            width: 160px;
+            height: 16px;
+            background: rgba(15, 23, 42, 0.85);
+            border-radius: 8px;
             border: 2px solid rgba(255, 255, 255, 0.2);
             overflow: hidden;
             position: relative;
@@ -48,7 +47,7 @@
         .bar-fill {
             height: 100%;
             width: 100%;
-            transition: width 0.2s ease-out;
+            transition: width 0.15s ease-out;
         }
         #healthFill { background: linear-gradient(90deg, #ef4444, #dc2626); }
         #hungerFill { background: linear-gradient(90deg, #f59e0b, #d97706); }
@@ -60,33 +59,34 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: #fff;
-            font-size: 10px;
-            font-weight: bold;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
             text-shadow: 1px 1px 2px #000;
         }
 
         #timeDisplay {
             color: #f8fafc;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
-            background: rgba(15, 23, 42, 0.8);
-            padding: 6px 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(15, 23, 42, 0.85);
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.15);
             width: fit-content;
         }
 
         #inventoryDisplay {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 12px;
+            right: 12px;
             background: rgba(15, 23, 42, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 12px;
+            padding: 10px 14px;
             border-radius: 10px;
             color: #fff;
             font-size: 12px;
-            min-width: 130px;
+            min-width: 120px;
             pointer-events: none;
             z-index: 10;
         }
@@ -94,12 +94,12 @@
         /* Touch Controls */
         #joystickZone {
             position: absolute;
-            bottom: 30px;
-            left: 30px;
+            bottom: 25px;
+            left: 25px;
             width: 120px;
             height: 120px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.25);
             border-radius: 50%;
             touch-action: none;
             z-index: 20;
@@ -110,32 +110,96 @@
             left: 35px;
             width: 50px;
             height: 50px;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.4);
             border-radius: 50%;
             pointer-events: none;
         }
-        #actionBtn {
+        .btn-group {
             position: absolute;
-            bottom: 40px;
-            right: 35px;
-            width: 75px;
-            height: 75px;
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            border: 3px solid rgba(255, 255, 255, 0.4);
+            bottom: 25px;
+            right: 25px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            z-index: 20;
+        }
+        .action-btn {
+            width: 68px;
+            height: 68px;
             border-radius: 50%;
             color: white;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
             touch-action: none;
-            z-index: 20;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.3);
+            cursor: pointer;
         }
-        #actionBtn:active {
-            transform: scale(0.92);
-            background: #1e40af;
+        #craftBtn {
+            background: linear-gradient(135deg, #059669, #10b981);
+            width: 58px;
+            height: 58px;
+            font-size: 11px;
+        }
+        #hitBtn {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            width: 75px;
+            height: 75px;
+            font-size: 15px;
+        }
+
+        /* Crafting Modal */
+        #craftModal {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            padding: 20px;
+            width: 85%;
+            max-width: 360px;
+            color: white;
+            z-index: 30;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+        }
+        .recipe-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .recipe-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        /* Game Over Modal */
+        #gameOverModal {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 40;
         }
     </style>
 </head>
@@ -162,17 +226,64 @@
 
     <div id="inventoryDisplay">
         <strong>🎒 Inventory</strong>
-        <div id="invList" style="margin-top:5px; color:#cbd5e1;">Empty</div>
+        <div id="invList" style="margin-top:4px; color:#cbd5e1; font-size:11px;">Empty</div>
     </div>
 
-    <!-- Mobile Touch Controls -->
+    <!-- Controls -->
     <div id="joystickZone">
         <div id="joystickKnob"></div>
     </div>
-    <div id="actionBtn">HIT</div>
+
+    <div class="btn-group">
+        <div id="craftBtn" class="action-btn">🔨 BUILD</div>
+        <div id="hitBtn" class="action-btn">🪓 HIT</div>
+    </div>
+
+    <!-- Crafting Menu -->
+    <div id="craftModal">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3>🛠️ Crafting & Base</h3>
+            <span id="closeCraft" style="cursor:pointer; font-size:18px;">✖</span>
+        </div>
+        <div class="recipe-item">
+            <div>
+                <strong>🔥 Campfire</strong><br>
+                <small style="color:#94a3b8">10 Wood, 5 Stone (Light & Heat)</small>
+            </div>
+            <button class="recipe-btn" onclick="craft('campfire')">Build</button>
+        </div>
+        <div class="recipe-item">
+            <div>
+                <strong>🧱 Wood Wall</strong><br>
+                <small style="color:#94a3b8">8 Wood (Blocks Enemies)</small>
+            </div>
+            <button class="recipe-btn" onclick="craft('wall')">Build</button>
+        </div>
+        <div class="recipe-item">
+            <div>
+                <strong>🗡️ Stone Sword</strong><br>
+                <small style="color:#94a3b8">5 Wood, 10 Stone (+25 Damage)</small>
+            </div>
+            <button class="recipe-btn" onclick="craft('sword')">Craft</button>
+        </div>
+        <div class="recipe-item">
+            <div>
+                <strong>🍖 Jam Meal</strong><br>
+                <small style="color:#94a3b8">3 Berries (+40 Hunger, +20 HP)</small>
+            </div>
+            <button class="recipe-btn" onclick="craft('meal')">Cook</button>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverModal">
+        <h1 style="color:#ef4444; font-size:40px; margin-bottom:10px;">YOU DIED</h1>
+        <p id="survivalScore" style="font-size:18px; color:#cbd5e1; margin-bottom:20px;">You survived 0 days.</p>
+        <button onclick="restartGame()" style="padding:12px 24px; background:#2563eb; color:white; border:none; border-radius:8px; font-weight:bold; font-size:16px;">Play Again</button>
+    </div>
 
 <script>
-// --- GAME ENGINE SETUP ---
+// --- ENGINE CANVAS SETUP ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -183,9 +294,9 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-// --- GAME STATE & VARS ---
-const WORLD_SIZE = 2500;
-let timeOfDay = 0; // 0 to 1
+// --- GAME STATE ---
+const WORLD_SIZE = 2400;
+let timeOfDay = 0.1; // 0..1
 let dayCount = 1;
 let dayLength = 120; // seconds
 
@@ -199,36 +310,50 @@ const player = {
     stamina: 100,
     vx: 0,
     vy: 0,
-    angle: 0
+    angle: 0,
+    hasSword: false
 };
 
-const inventory = {
-    wood: 0,
-    stone: 0,
-    berry: 0
-};
+const inventory = { wood: 15, stone: 10, berry: 5 };
 
-const keys = {};
-let joystickVector = { x: 0, y: 0 };
-
-// World Objects
 const resources = [];
 const enemies = [];
+const buildings = [];
+const particles = [];
+const popups = [];
 
-// Seed World Resources
-for (let i = 0; i < 120; i++) {
+// Populate Resources
+for (let i = 0; i < 140; i++) {
     const type = Math.random() < 0.5 ? 'tree' : (Math.random() < 0.8 ? 'rock' : 'berry');
     resources.push({
         x: Math.random() * (WORLD_SIZE - 200) + 100,
         y: Math.random() * (WORLD_SIZE - 200) + 100,
         type: type,
         hp: type === 'rock' ? 5 : 3,
-        maxHp: type === 'rock' ? 5 : 3,
         radius: type === 'tree' ? 24 : (type === 'rock' ? 18 : 12)
     });
 }
 
-// Web Audio Generator (No external files needed!)
+// Particle System
+function addParticles(x, y, color, count = 6) {
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: x, y: y,
+            vx: (Math.random() - 0.5) * 4,
+            vy: (Math.random() - 0.5) * 4,
+            color: color,
+            life: 1.0,
+            radius: Math.random() * 3 + 2
+        });
+    }
+}
+
+// Floating Text Popups
+function addPopup(x, y, text, color = '#fff') {
+    popups.push({ x: x, y: y, text: text, color: color, life: 1.0 });
+}
+
+// Sound Synthesizer (Offline Audio)
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(type) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -238,29 +363,30 @@ function playSound(type) {
     gain.connect(audioCtx.destination);
 
     if (type === 'hit') {
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(120, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.1);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
         gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
         gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.1);
-    } else if (type === 'collect') {
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    } else if (type === 'craft') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.15);
+        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
     }
 }
 
 // --- CONTROLS ---
+const keys = {};
+let joystickVector = { x: 0, y: 0 };
+
 window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
 window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
-// Touch Joystick Logic
+// Touch Joystick
 const joystickZone = document.getElementById('joystickZone');
 const joystickKnob = document.getElementById('joystickKnob');
 let touchId = null;
@@ -270,19 +396,16 @@ joystickZone.addEventListener('touchstart', e => {
     touchId = touch.identifier;
     updateJoystick(touch);
 });
-
 joystickZone.addEventListener('touchmove', e => {
     for (let touch of e.changedTouches) {
         if (touch.identifier === touchId) updateJoystick(touch);
     }
 });
-
 function resetJoystick() {
     touchId = null;
     joystickKnob.style.transform = `translate(0px, 0px)`;
     joystickVector = { x: 0, y: 0 };
 }
-
 joystickZone.addEventListener('touchend', resetJoystick);
 joystickZone.addEventListener('touchcancel', resetJoystick);
 
@@ -299,81 +422,115 @@ function updateJoystick(touch) {
         dx = (dx / dist) * maxDist;
         dy = (dy / dist) * maxDist;
     }
-
     joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
     joystickVector = { x: dx / maxDist, y: dy / maxDist };
 }
 
-// Action / Hit Button
-const actionBtn = document.getElementById('actionBtn');
-actionBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    performAction();
-});
-window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') performAction();
-});
+// Hit & Crafting UI Actions
+document.getElementById('hitBtn').addEventListener('touchstart', (e) => { e.preventDefault(); performAction(); });
+document.getElementById('hitBtn').addEventListener('click', performAction);
+
+const craftModal = document.getElementById('craftModal');
+document.getElementById('craftBtn').addEventListener('click', () => craftModal.style.display = 'block');
+document.getElementById('closeCraft').addEventListener('click', () => craftModal.style.display = 'none');
+
+function craft(item) {
+    if (item === 'campfire') {
+        if (inventory.wood >= 10 && inventory.stone >= 5) {
+            inventory.wood -= 10; inventory.stone -= 5;
+            buildings.push({ x: player.x, y: player.y, type: 'campfire', radius: 18 });
+            addPopup(player.x, player.y - 20, "🔥 Campfire Built!", "#f59e0b");
+            playSound('craft');
+        } else addPopup(player.x, player.y - 20, "Need 10 Wood, 5 Stone!", "#ef4444");
+    } else if (item === 'wall') {
+        if (inventory.wood >= 8) {
+            inventory.wood -= 8;
+            buildings.push({ x: player.x, y: player.y, type: 'wall', radius: 20, hp: 100 });
+            addPopup(player.x, player.y - 20, "🧱 Wall Placed!", "#3b82f6");
+            playSound('craft');
+        } else addPopup(player.x, player.y - 20, "Need 8 Wood!", "#ef4444");
+    } else if (item === 'sword') {
+        if (inventory.wood >= 5 && inventory.stone >= 10) {
+            inventory.wood -= 5; inventory.stone -= 10;
+            player.hasSword = true;
+            addPopup(player.x, player.y - 20, "🗡️ Stone Sword Equipped!", "#10b981");
+            playSound('craft');
+        } else addPopup(player.x, player.y - 20, "Need 5 Wood, 10 Stone!", "#ef4444");
+    } else if (item === 'meal') {
+        if (inventory.berry >= 3) {
+            inventory.berry -= 3;
+            player.hunger = Math.min(100, player.hunger + 40);
+            player.health = Math.min(100, player.health + 20);
+            addPopup(player.x, player.y - 20, "🍖 Aet Cooked Meal!", "#10b981");
+            playSound('craft');
+        } else addPopup(player.x, player.y - 20, "Need 3 Berries!", "#ef4444");
+    }
+    updateHUD();
+}
 
 function performAction() {
     playSound('hit');
-    // Check hit resources
+    const hitDamage = player.hasSword ? 35 : 12;
+
+    // Harvest Resources
     resources.forEach((res, index) => {
         const dist = Math.hypot(player.x - res.x, player.y - res.y);
-        if (dist < res.radius + player.radius + 25) {
+        if (dist < res.radius + player.radius + 30) {
             res.hp--;
-            if (res.type === 'tree') inventory.wood++;
-            if (res.type === 'rock') inventory.stone++;
-            if (res.type === 'berry') {
+            if (res.type === 'tree') {
+                inventory.wood++;
+                addParticles(res.x, res.y, '#15803d');
+                addPopup(res.x, res.y, '+1 Wood', '#4ade80');
+            } else if (res.type === 'rock') {
+                inventory.stone++;
+                addParticles(res.x, res.y, '#94a3b8');
+                addPopup(res.x, res.y, '+1 Stone', '#cbd5e1');
+            } else if (res.type === 'berry') {
                 inventory.berry++;
-                player.hunger = Math.min(100, player.hunger + 15);
+                addParticles(res.x, res.y, '#c084fc');
+                addPopup(res.x, res.y, '+1 Berry', '#e879f9');
             }
-            playSound('collect');
 
-            if (res.hp <= 0) {
-                resources.splice(index, 1);
-            }
+            if (res.hp <= 0) resources.splice(index, 1);
             updateHUD();
         }
     });
 
-    // Check hit enemies
+    // Attack Enemies
     enemies.forEach((en, index) => {
         const dist = Math.hypot(player.x - en.x, player.y - en.y);
-        if (dist < en.radius + player.radius + 30) {
-            en.hp -= 25;
+        if (dist < en.radius + player.radius + 35) {
+            en.hp -= hitDamage;
+            addParticles(en.x, en.y, '#ef4444', 8);
+            addPopup(en.x, en.y, `-${hitDamage}`, '#f87171');
             if (en.hp <= 0) enemies.splice(index, 1);
         }
     });
 }
 
-// --- GAME LOOP ---
+// --- MAIN GAME LOOP ---
 let lastTime = performance.now();
 
 function update(dt) {
-    // 1. Time / Day-Night
-    timeOfDay += dt / dayLength;
-    if (timeOfDay >= 1) {
-        timeOfDay = 0;
-        dayCount++;
-    }
+    if (player.health <= 0) return;
 
-    // Spawn Night Monsters
+    // Time Cycle
+    timeOfDay += dt / dayLength;
+    if (timeOfDay >= 1) { timeOfDay = 0; dayCount++; }
+
+    // Spawn Enemies at Night
     const isNight = timeOfDay > 0.5;
-    if (isNight && enemies.length < 5 && Math.random() < 0.01) {
+    if (isNight && enemies.length < 8 && Math.random() < 0.015) {
         enemies.push({
-            x: player.x + (Math.random() - 0.5) * 800,
-            y: player.y + (Math.random() - 0.5) * 800,
-            radius: 14,
-            speed: 2.2,
-            hp: 40,
-            damage: 10
+            x: player.x + (Math.random() - 0.5) * 900,
+            y: player.y + (Math.random() - 0.5) * 900,
+            radius: 14, speed: 2.3, hp: 50, damage: 12
         });
     }
 
-    // 2. Player Movement
+    // Movement
     let dx = joystickVector.x;
     let dy = joystickVector.y;
-
     if (keys['a'] || keys['arrowleft']) dx = -1;
     if (keys['d'] || keys['arrowright']) dx = 1;
     if (keys['w'] || keys['arrowup']) dy = -1;
@@ -384,31 +541,52 @@ function update(dt) {
         player.vx = (dx / len) * player.speed;
         player.vy = (dy / len) * player.speed;
         player.angle = Math.atan2(dy, dx);
-    } else {
-        player.vx = 0;
-        player.vy = 0;
+    } else { player.vx = 0; player.vy = 0; }
+
+    let nextX = Math.max(30, Math.min(WORLD_SIZE - 30, player.x + player.vx));
+    let nextY = Math.max(30, Math.min(WORLD_SIZE - 30, player.y + player.vy));
+
+    // Collision with Walls
+    buildings.forEach(b => {
+        if (b.type === 'wall') {
+            const dist = Math.hypot(nextX - b.x, nextY - b.y);
+            if (dist < player.radius + b.radius) {
+                nextX = player.x; nextY = player.y;
+            }
+        }
+    });
+
+    player.x = nextX; player.y = nextY;
+
+    // Survival Drains
+    player.hunger = Math.max(0, player.hunger - 0.12 * dt);
+    if (player.hunger <= 0) player.health = Math.max(0, player.health - 2.0 * dt);
+
+    if (player.health <= 0) {
+        document.getElementById('gameOverModal').style.display = 'flex';
+        document.getElementById('survivalScore').innerText = `You survived ${dayCount} Days!`;
     }
 
-    player.x = Math.max(30, Math.min(WORLD_SIZE - 30, player.x + player.vx));
-    player.y = Math.max(30, Math.min(WORLD_SIZE - 30, player.y + player.vy));
-
-    // 3. Survival Drain
-    player.hunger = Math.max(0, player.hunger - 0.1 * dt);
-    if (player.hunger <= 0) {
-        player.health = Math.max(0, player.health - 1.5 * dt);
-    }
-
-    // 4. Enemy AI
+    // Enemy AI
     enemies.forEach(en => {
         const angle = Math.atan2(player.y - en.y, player.x - en.x);
         en.x += Math.cos(angle) * en.speed;
         en.y += Math.sin(angle) * en.speed;
 
-        // Attack Player
         const dist = Math.hypot(player.x - en.x, player.y - en.y);
         if (dist < player.radius + en.radius) {
             player.health = Math.max(0, player.health - en.damage * dt);
         }
+    });
+
+    // Particles & Popups decay
+    particles.forEach((p, i) => {
+        p.x += p.vx; p.y += p.vy; p.life -= dt * 2;
+        if (p.life <= 0) particles.splice(i, 1);
+    });
+    popups.forEach((pop, i) => {
+        pop.y -= 0.5; pop.life -= dt * 1.5;
+        if (pop.life <= 0) popups.splice(i, 1);
     });
 
     updateHUD();
@@ -425,14 +603,14 @@ function updateHUD() {
     document.getElementById('invList').innerHTML = `
         🪵 Wood: ${inventory.wood}<br>
         🪨 Stone: ${inventory.stone}<br>
-        🫐 Berries: ${inventory.berry}
+        🫐 Berries: ${inventory.berry}<br>
+        ${player.hasSword ? '🗡️ Sword Equipped' : ''}
     `;
 }
 
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Camera offset
     const camX = canvas.width / 2 - player.x;
     const camY = canvas.height / 2 - player.y;
 
@@ -440,97 +618,115 @@ function render() {
     ctx.translate(camX, camY);
 
     // Grid Floor
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 1;
-    const gridSize = 100;
-    for (let x = 0; x < WORLD_SIZE; x += gridSize) {
+    ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1;
+    for (let x = 0; x < WORLD_SIZE; x += 100) {
         ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD_SIZE); ctx.stroke();
     }
-    for (let y = 0; y < WORLD_SIZE; y += gridSize) {
+    for (let y = 0; y < WORLD_SIZE; y += 100) {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD_SIZE, y); ctx.stroke();
     }
 
-    // World Border
-    ctx.strokeStyle = '#ef4444';
-    ctx.lineWidth = 8;
-    ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
-
-    // Render Resources
-    resources.forEach(res => {
-        ctx.beginPath();
-        if (res.type === 'tree') {
-            ctx.fillStyle = '#15803d';
-            ctx.arc(res.x, res.y, res.radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#166534';
-            ctx.arc(res.x - 4, res.y - 4, res.radius * 0.6, 0, Math.PI * 2);
-            ctx.fill();
-        } else if (res.type === 'rock') {
-            ctx.fillStyle = '#64748b';
-            ctx.arc(res.x, res.y, res.radius, 0, Math.PI * 2);
-            ctx.fill();
-        } else if (res.type === 'berry') {
-            ctx.fillStyle = '#a855f7';
-            ctx.arc(res.x, res.y, res.radius, 0, Math.PI * 2);
-            ctx.fill();
+    // Buildings
+    buildings.forEach(b => {
+        if (b.type === 'campfire') {
+            ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); ctx.fill();
+        } else if (b.type === 'wall') {
+            ctx.fillStyle = '#78350f'; ctx.fillRect(b.x - b.radius, b.y - b.radius, b.radius*2, b.radius*2);
         }
     });
 
-    // Render Enemies
-    enemies.forEach(en => {
-        ctx.fillStyle = '#dc2626';
+    // Resources
+    resources.forEach(res => {
         ctx.beginPath();
-        ctx.arc(en.x, en.y, en.radius, 0, Math.PI * 2);
-        ctx.fill();
-        // Glowing eyes
-        ctx.fillStyle = '#fef08a';
-        ctx.fillRect(en.x - 4, en.y - 4, 3, 3);
-        ctx.fillRect(en.x + 2, en.y - 4, 3, 3);
+        if (res.type === 'tree') {
+            ctx.fillStyle = '#166534'; ctx.arc(res.x, res.y, res.radius, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#22c55e'; ctx.arc(res.x - 3, res.y - 3, res.radius * 0.6, 0, Math.PI * 2); ctx.fill();
+        } else if (res.type === 'rock') {
+            ctx.fillStyle = '#475569'; ctx.arc(res.x, res.y, res.radius, 0, Math.PI * 2); ctx.fill();
+        } else if (res.type === 'berry') {
+            ctx.fillStyle = '#a855f7'; ctx.arc(res.x, res.y, res.radius, 0, Math.PI * 2); ctx.fill();
+        }
     });
 
-    // Render Player
+    // Enemies
+    enemies.forEach(en => {
+        ctx.fillStyle = '#dc2626'; ctx.beginPath(); ctx.arc(en.x, en.y, en.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fef08a'; ctx.fillRect(en.x - 4, en.y - 3, 3, 3); ctx.fillRect(en.x + 2, en.y - 3, 3, 3);
+    });
+
+    // Particles
+    particles.forEach(p => {
+        ctx.fillStyle = p.color; ctx.globalAlpha = p.life;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1.0;
+    });
+
+    // Player
     ctx.save();
     ctx.translate(player.x, player.y);
     ctx.rotate(player.angle);
+    ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(0, 0, player.radius, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = player.hasSword ? '#94a3b8' : '#0284c7';
+    ctx.fillRect(10, -4, player.hasSword ? 22 : 12, 8);
+    ctx.restore();
 
-    // Body
-    ctx.fillStyle = '#38bdf8';
-    ctx.beginPath();
-    ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Hands / Weapon direction
-    ctx.fillStyle = '#0284c7';
-    ctx.fillRect(10, -4, 12, 8);
+    // Popups
+    popups.forEach(pop => {
+        ctx.fillStyle = pop.color; ctx.font = 'bold 12px sans-serif';
+        ctx.fillText(pop.text, pop.x - 15, pop.y);
+    });
 
     ctx.restore();
 
-    ctx.restore();
-
-    // Day / Night Overlay
-    let nightAlpha = 0;
-    if (timeOfDay > 0.4 && timeOfDay < 0.6) {
-        nightAlpha = (timeOfDay - 0.4) * 3.5; // dusk
-    } else if (timeOfDay >= 0.6 && timeOfDay < 0.9) {
-        nightAlpha = 0.7; // full night
-    } else if (timeOfDay >= 0.9) {
-        nightAlpha = (1 - timeOfDay) * 7; // dawn
-    }
-
-    if (nightAlpha > 0) {
-        ctx.fillStyle = `rgba(15, 23, 42, ${nightAlpha})`;
+    // --- LIGHTING ENGINE (Flashlight Cone + Campfires) ---
+    const isNight = timeOfDay > 0.4;
+    if (isNight) {
+        let nightAlpha = Math.min(0.92, (timeOfDay - 0.4) * 2.5);
+        
+        ctx.save();
+        ctx.fillStyle = `rgba(2, 6, 23, ${nightAlpha})`;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.globalCompositeOperation = 'destination-out';
+
+        // Player Flashlight Cone
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(player.angle);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, 240, -Math.PI / 4, Math.PI / 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Campfire Lights
+        buildings.forEach(b => {
+            if (b.type === 'campfire') {
+                const screenX = b.x + camX;
+                const screenY = b.y + camY;
+                const radGrd = ctx.createRadialGradient(screenX, screenY, 10, screenX, screenY, 180);
+                radGrd.addColorStop(0, 'rgba(0,0,0,1)');
+                radGrd.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = radGrd;
+                ctx.beginPath(); ctx.arc(screenX, screenY, 180, 0, Math.PI*2); ctx.fill();
+            }
+        });
+
+        ctx.restore();
     }
 }
 
 function gameLoop(now) {
     const dt = (now - lastTime) / 1000;
     lastTime = now;
-
     update(dt);
     render();
-
     requestAnimationFrame(gameLoop);
+}
+
+function restartGame() {
+    location.reload();
 }
 
 requestAnimationFrame(gameLoop);
